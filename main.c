@@ -1,4 +1,4 @@
-#include "ralib/ralib.h"
+#include "ralib/vector.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -43,7 +43,7 @@ int main()
 
     // Elements are zero-initialized
 
-    assert (rav_get(vec, 50, int) == 0);
+    assert (rav_at(int, vec, 50) == 0);
 
     // Resize to 10 elements
     
@@ -56,12 +56,15 @@ int main()
         printf ("%d\n", *ptr);
     }
     
+    // Erase
+    
+    rav_qerase(vec, rav_iter(vec, 2), rav_iter(vec, 5));
+    
     // Also indices!
     
     for (i=0; i < rav_size(vec); ++i)
     {
-        ptr = rav_at(vec, i);
-        printf ("%d\n", *ptr);
+        printf ("%d\n", rav_at(int, vec, i));
     }
     
     // Always remember to free!

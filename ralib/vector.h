@@ -27,6 +27,7 @@ inline void ra_vector_impl_push_back(ra_vector_p v, void* d);
 inline void ra_vector_impl_pop_back(ra_vector_p v);
 inline void* ra_vector_impl_at(ra_vector_p v, size_t i);
 inline bool ra_vector_impl_empty(ra_vector_p v);
+inline void ra_vector_impl_erase(ra_vector_p v, void* b, void* e);
 
 inline ra_vector ra_vector_impl_new(size_t s, size_t n)
 {
@@ -131,16 +132,65 @@ inline bool ra_vector_impl_empty(ra_vector_p v)
     return (v->begin == v->end);
 }
 
-#define rav_new(T, N)        (ra_vector_impl_new(sizeof(T), (N)))
-#define rav_free(V)          (ra_vector_impl_free(&(V)))
-#define rav_capacity(V)      (ra_vector_impl_capacity(&(V)))
-#define rav_size(V)          (ra_vector_impl_size(&(V)))
-#define rav_reserve(V, N)    (ra_vector_impl_reserve(&(V), (N)))
-#define rav_resize(V, N)     (ra_vector_impl_resize(&(V), (N)))
-#define rav_push(V, D)       (ra_vector_impl_push_back(&(V), &(D)))
-#define rav_pop(V)           (ra_vector_impl_pop_back(&(V)))
-#define rav_at(V, N)         (ra_vector_impl_at(&(V), (N)))
-#define rav_get(V, N, T)     ((*(int*)ra_vector_impl_at(&(V), (N))))
-#define rav_empty(V)         (ra_vector_impl_empty(&(V)))
+inline void ra_vector_impl_erase(ra_vector_p v, void* b, void* e)
+{
+    assert((char*)v->begin < (char*)b);
+    assert((char*)v->begin < (char*)e);
+    assert((char*)b < (char*)e);
+    assert(((char*)b - (char*)v->begin) < ra_vector_impl_sizeb(v));
+    assert(((char*)e - (char*)v->begin) < ra_vector_impl_sizeb(v));
+    
+    size_t e_to_end = ((char*)v->end - (char*)e);
+    
+    memmove(b, e, e_to_end);
+    
+    v->end = b + e_to_end;
+}
+
+inline void ra_vector_impl_quick_erase(ra_vector_p v, void* b, void* e)
+{
+    assert((char*)v->begin < (char*)b);
+    assert((char*)v->begin < (char*)e);
+    assert((char*)b < (char*)e);
+    assert(((char*)b - (char*)v->begin) < ra_vector_impl_sizeb(v));
+    assert(((char*)e - (char*)v->begin) < ra_vector_impl_sizeb(v));
+    
+    size_t b_to_e = ((char*)e - (char*)b);
+    size_t e_to_end = ((char*)v->end - (char*)e);
+    void* new_end;
+    
+    if (b_to_e > e_to_end)
+    {
+        memmove(b, e, e_to_end);
+        v->end = b + e_to_end;
+        return;
+    }
+    
+    new_end = ((char*)v->end - b_to_e);
+    
+    memcpy(b, new_end, b_to_e);
+    
+    v->end = new_end;
+}
+
+void* ra_vector_impl_make_iterator(ra_vector_p v, size_t i)
+{
+    assert(i <= ra_vector_impl_size(v));
+    return (v->begin + (i * v->stride));
+}
+
+#define rav_new(T, N)           (ra_vector_impl_new(sizeof(T), (N)))
+#define rav_free(V)             (ra_vector_impl_free(&(V)))
+#define rav_capacity(V)         (ra_vector_impl_capacity(&(V)))
+#define rav_size(V)             (ra_vector_impl_size(&(V)))
+#define rav_reserve(V, N)       (ra_vector_impl_reserve(&(V), (N)))
+#define rav_resize(V, N)        (ra_vector_impl_resize(&(V), (N)))
+#define rav_push(V, D)          (ra_vector_impl_push_back(&(V), &(D)))
+#define rav_pop(V)              (ra_vector_impl_pop_back(&(V)))
+#define rav_at(T, V, N)         ((*(T*)ra_vector_impl_at(&(V), (N))))
+#define rav_empty(V)            (ra_vector_impl_empty(&(V)))
+#define rav_erase(V, B, E)      (ra_vector_impl_erase(&(V), (B), (E)))
+#define rav_qerase(V, B, E)     (ra_vector_impl_quick_erase(&(V), (B), (E)))
+#define rav_iter(V, I)          (ra_vector_impl_make_iterator(&(V), (I)))
 
 #endif // RALIB_VECTOR_H
