@@ -15,51 +15,51 @@ typedef struct ra_vector_t
     size_t stride;
 } *ra_vector_p, ra_vector;
 
-inline ra_vector ra_vector_impl_new(size_t s, size_t n);
-inline void ra_vector_impl_free(ra_vector_p v);
-inline size_t ra_vector_impl_capacity(ra_vector_p v);
-inline size_t ra_vector_impl_size(ra_vector_p v);
-inline size_t ra_vector_impl_sizeb(ra_vector_p v);
-inline void ra_vector_impl_reserve(ra_vector_p v, size_t n);
-inline void ra_vector_impl_expand(ra_vector_p v);
-inline void ra_vector_impl_resize(ra_vector_p v, size_t n);
-inline void ra_vector_impl_push_back(ra_vector_p v, void* d);
-inline void ra_vector_impl_pop_back(ra_vector_p v);
-inline void* ra_vector_impl_at(ra_vector_p v, size_t i);
-inline bool ra_vector_impl_empty(ra_vector_p v);
-inline void ra_vector_impl_erase(ra_vector_p v, void* b, void* e);
+static ra_vector ra_vector_impl_new(size_t s, size_t n);
+static void ra_vector_impl_free(ra_vector_p v);
+static size_t ra_vector_impl_capacity(ra_vector_p v);
+static size_t ra_vector_impl_size(ra_vector_p v);
+static size_t ra_vector_impl_sizeb(ra_vector_p v);
+static void ra_vector_impl_reserve(ra_vector_p v, size_t n);
+static void ra_vector_impl_expand(ra_vector_p v);
+static void ra_vector_impl_resize(ra_vector_p v, size_t n);
+static void ra_vector_impl_push_back(ra_vector_p v, void* d);
+static void ra_vector_impl_pop_back(ra_vector_p v);
+static void* ra_vector_impl_at(ra_vector_p v, size_t i);
+static bool ra_vector_impl_empty(ra_vector_p v);
+static void ra_vector_impl_erase(ra_vector_p v, void* b, void* e);
 
-inline ra_vector ra_vector_impl_new(size_t s, size_t n)
+static ra_vector ra_vector_impl_new(size_t s, size_t n)
 {
     ra_vector rv = { .begin = NULL, .end = NULL, .final = NULL, .stride = s };
     ra_vector_impl_resize(&rv, n);
     return rv;
 }
 
-inline void ra_vector_impl_free(ra_vector_p v)
+static void ra_vector_impl_free(ra_vector_p v)
 {
     free(v->begin);
 }
 
-inline size_t ra_vector_impl_capacity(ra_vector_p v)
+static size_t ra_vector_impl_capacity(ra_vector_p v)
 {
     if (!v->begin) return 0;
     return (((char*)v->final - (char*)v->begin) / v->stride);
 }
 
-inline size_t ra_vector_impl_size(ra_vector_p v)
+static size_t ra_vector_impl_size(ra_vector_p v)
 {
     if (!v->begin) return 0;
     return (((char*)v->end - (char*)v->begin) / v->stride);
 }
 
-inline size_t ra_vector_impl_sizeb(ra_vector_p v)
+static size_t ra_vector_impl_sizeb(ra_vector_p v)
 {
     if (!v->begin) return 0;
     return ((char*)v->end - (char*)v->begin);
 }
 
-inline void ra_vector_impl_reserve(ra_vector_p v, size_t n)
+static void ra_vector_impl_reserve(ra_vector_p v, size_t n)
 {
     size_t prevcap = ra_vector_impl_capacity(v);
     size_t prevszb;
@@ -80,7 +80,7 @@ inline void ra_vector_impl_reserve(ra_vector_p v, size_t n)
     v->final = new_block + nb;
 }
 
-inline void ra_vector_impl_expand(ra_vector_p v)
+static void ra_vector_impl_expand(ra_vector_p v)
 {
     size_t prevcap = ra_vector_impl_capacity(v);
     
@@ -88,7 +88,7 @@ inline void ra_vector_impl_expand(ra_vector_p v)
     ra_vector_impl_reserve(v, prevcap*2);
 }
 
-inline void ra_vector_impl_resize(ra_vector_p v, size_t n)
+static void ra_vector_impl_resize(ra_vector_p v, size_t n)
 {
     size_t prevcap = ra_vector_impl_capacity(v);
     size_t prevsz = ra_vector_impl_size(v);
@@ -105,7 +105,7 @@ inline void ra_vector_impl_resize(ra_vector_p v, size_t n)
     v->end = new_end;
 }
 
-inline void ra_vector_impl_push_back(ra_vector_p v, void* d)
+static void ra_vector_impl_push_back(ra_vector_p v, void* d)
 {
     assert(d);
     
@@ -115,24 +115,24 @@ inline void ra_vector_impl_push_back(ra_vector_p v, void* d)
     v->end = (char*)v->end + v->stride;
 }
 
-inline void ra_vector_impl_pop_back(ra_vector_p v)
+static void ra_vector_impl_pop_back(ra_vector_p v)
 {
     assert(!ra_vector_impl_empty(v));
     v->end = (char*)v->end - v->stride;
 }
 
-inline void* ra_vector_impl_at(ra_vector_p v, size_t i)
+static void* ra_vector_impl_at(ra_vector_p v, size_t i)
 {
     assert(i < ra_vector_impl_size(v));
     return ((char*)v->begin + (v->stride * i));
 }
 
-inline bool ra_vector_impl_empty(ra_vector_p v)
+static bool ra_vector_impl_empty(ra_vector_p v)
 {
     return (v->begin == v->end);
 }
 
-inline void ra_vector_impl_erase(ra_vector_p v, void* b, void* e)
+static void ra_vector_impl_erase(ra_vector_p v, void* b, void* e)
 {
     assert((char*)v->begin < (char*)b);
     assert((char*)v->begin < (char*)e);
@@ -147,7 +147,7 @@ inline void ra_vector_impl_erase(ra_vector_p v, void* b, void* e)
     v->end = b + e_to_end;
 }
 
-inline void ra_vector_impl_quick_erase(ra_vector_p v, void* b, void* e)
+static void ra_vector_impl_quick_erase(ra_vector_p v, void* b, void* e)
 {
     assert((char*)v->begin < (char*)b);
     assert((char*)v->begin < (char*)e);
