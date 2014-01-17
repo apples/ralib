@@ -28,6 +28,9 @@ static void ra_vector_impl_pop_back(ra_vector_p v);
 static void* ra_vector_impl_at(ra_vector_p v, size_t i);
 static bool ra_vector_impl_empty(ra_vector_p v);
 static void ra_vector_impl_erase(ra_vector_p v, void* b, void* e);
+static void ra_vector_impl_quick_erase(ra_vector_p v, void* b, void* e);
+static void ra_vector_impl_insert(ra_vector_p v, void* pos, void* b, void* e);
+static void* ra_vector_impl_make_iterator(ra_vector_p v, size_t i);
 
 static ra_vector ra_vector_impl_new(size_t s, size_t n)
 {
@@ -134,11 +137,11 @@ static bool ra_vector_impl_empty(ra_vector_p v)
 
 static void ra_vector_impl_erase(ra_vector_p v, void* b, void* e)
 {
-    assert((char*)v->begin < (char*)b);
-    assert((char*)v->begin < (char*)e);
-    assert((char*)b < (char*)e);
-    assert(((char*)b - (char*)v->begin) < ra_vector_impl_sizeb(v));
-    assert(((char*)e - (char*)v->begin) < ra_vector_impl_sizeb(v));
+    assert((char*)v->begin <= (char*)b);
+    assert((char*)v->begin <= (char*)e);
+    assert((char*)b <= (char*)e);
+    assert(((char*)b - (char*)v->begin) <= ra_vector_impl_sizeb(v));
+    assert(((char*)e - (char*)v->begin) <= ra_vector_impl_sizeb(v));
     
     size_t e_to_end = ((char*)v->end - (char*)e);
     
@@ -149,11 +152,11 @@ static void ra_vector_impl_erase(ra_vector_p v, void* b, void* e)
 
 static void ra_vector_impl_quick_erase(ra_vector_p v, void* b, void* e)
 {
-    assert((char*)v->begin < (char*)b);
-    assert((char*)v->begin < (char*)e);
-    assert((char*)b < (char*)e);
-    assert(((char*)b - (char*)v->begin) < ra_vector_impl_sizeb(v));
-    assert(((char*)e - (char*)v->begin) < ra_vector_impl_sizeb(v));
+    assert((char*)v->begin <= (char*)b);
+    assert((char*)v->begin <= (char*)e);
+    assert((char*)b <= (char*)e);
+    assert(((char*)b - (char*)v->begin) <= ra_vector_impl_sizeb(v));
+    assert(((char*)e - (char*)v->begin) <= ra_vector_impl_sizeb(v));
     
     size_t b_to_e = ((char*)e - (char*)b);
     size_t e_to_end = ((char*)v->end - (char*)e);
@@ -173,7 +176,29 @@ static void ra_vector_impl_quick_erase(ra_vector_p v, void* b, void* e)
     v->end = new_end;
 }
 
-void* ra_vector_impl_make_iterator(ra_vector_p v, size_t i)
+static void ra_vector_impl_insert(ra_vector_p v, void* pos, void* b, void* e)
+{
+    assert((char*)b <= (char*)e);
+    assert((char*)pos >= (char*)v->begin);
+    assert((char*)pos <= (char*)v->end);
+    
+    size_t b_to_e = ((char*)e - (char*)b);
+    size_t begin_to_pos = ((char*)pos - (char*)v->begin);
+    size_t pos_to_end = ((char*)v->end - (char*)pos);
+    
+    size_t newsz = ra_vector_impl_size(v) + (b_to_e / v->stride);
+    
+    ra_vector_impl_reserve(v, newsz);
+    
+    pos = (char*)v->begin + begin_to_pos;
+    
+    memmove(pos + b_to_e, pos, pos_to_end);
+    memcpy(pos, b, b_to_e);
+    
+    v->end += b_to_e;
+}
+
+static void* ra_vector_impl_make_iterator(ra_vector_p v, size_t i)
 {
     assert(i <= ra_vector_impl_size(v));
     return (v->begin + (i * v->stride));
@@ -191,6 +216,9 @@ void* ra_vector_impl_make_iterator(ra_vector_p v, size_t i)
 #define rav_empty(V)            (ra_vector_impl_empty(&(V)))
 #define rav_erase(V, B, E)      (ra_vector_impl_erase(&(V), (B), (E)))
 #define rav_qerase(V, B, E)     (ra_vector_impl_quick_erase(&(V), (B), (E)))
+#define rav_insert(V, P, B, E)  (ra_vector_impl_insert(&(V), (P), (B), (E)))
 #define rav_iter(V, I)          (ra_vector_impl_make_iterator(&(V), (I)))
+#define rav_begin(T, V)         ((T*)((V).begin))
+#define rav_end(T, V)           ((T*)((V).end))
 
 #endif // RALIB_VECTOR_H

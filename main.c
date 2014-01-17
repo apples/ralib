@@ -1,9 +1,10 @@
 #include "ralib/vector.h"
+#include "ralib/string.h"
 
 #include <assert.h>
 #include <stdio.h>
 
-int main()
+void vector_test(void)
 {
     ra_vector vec = rav_new(int, 0);
     int i;
@@ -51,10 +52,12 @@ int main()
     
     // Iterators!
     
+    printf("Size: %d\n", (int)rav_size(vec));
     for (ptr = vec.begin; ptr != vec.end; ++ptr)
     {
         printf ("%d\n", *ptr);
     }
+    printf("\n");
     
     // Erase
     
@@ -62,14 +65,34 @@ int main()
     
     // Also indices!
     
+    printf("Size: %d\n", (int)rav_size(vec));
     for (i=0; i < rav_size(vec); ++i)
     {
         printf ("%d\n", rav_at(int, vec, i));
     }
+    printf("\n");
+    
+    // Insertion
+    
+    int arr[] = {17, 42, 69};
+    
+    rav_insert(vec, rav_begin(int, vec), &arr[0], &arr[3]);
+    
+    printf("Size: %d\n", (int)rav_size(vec));
+    for (i=0; i < rav_size(vec); ++i)
+    {
+        printf ("%d\n", rav_at(int, vec, i));
+    }
+    printf("\n");
     
     // Always remember to free!
     
     rav_free(vec);
+}
+
+int main()
+{
+    vector_test();
     
     return 0;
 }
