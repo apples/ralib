@@ -1,10 +1,10 @@
 #include "ralib/vector.h"
-#include "ralib/string.h"
+#include "ralib/bitset.h"
 
 #include <assert.h>
 #include <stdio.h>
 
-void vector_test(void)
+static void vector_test(void)
 {
     ra_vector vec = rav_new(int, 0);
     int i;
@@ -90,9 +90,48 @@ void vector_test(void)
     rav_free(vec);
 }
 
+static void bitset_test(void)
+{
+    ra_bitset bs = rabs_new(10);
+    ra_bitset bs2 = rabs_new(10);
+    
+    char str[11];
+    
+    rabs_str(bs, str);
+    puts(str);
+    
+    rabs_set(bs, 2, true);
+    rabs_str(bs, str);
+    puts(str);
+    
+    rabs_flip(bs, 1);
+    rabs_str(bs, str);
+    puts(str);
+    
+    rabs_flip(bs, 2);
+    rabs_str(bs, str);
+    puts(str);
+    
+    puts("");
+    
+    rabs_str(bs2, str);
+    puts(str);
+    rabs_set(bs2, 5, true);
+    rabs_str(bs2, str);
+    puts(str);
+    
+    puts("");
+    
+    rabs_str(rabs_or_eq(bs2, bs), str);
+    puts(str);
+    
+    rabs_free(bs2);
+    rabs_free(bs);
+}
+
 int main()
 {
-    vector_test();
+    bitset_test();
     
     return 0;
 }
