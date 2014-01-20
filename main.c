@@ -125,6 +125,11 @@ static void bitset_test(void)
     rabs_str(rabs_or_eq(bs2, bs), str);
     puts(str);
     
+    puts("");
+    
+    printf("Bits in bs:  %d\n", (int)rabs_bitcount(bs));
+    printf("Bits in bs2: %d\n", (int)rabs_bitcount(bs2));
+    
     rabs_free(bs2);
     rabs_free(bs);
 }

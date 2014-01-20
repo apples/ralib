@@ -137,6 +137,24 @@ static void ra_bitset_impl_stringify(ra_bitset_p bs, char* str)
     str[i] = '\0';
 }
 
+static size_t ra_bitset_impl_count_bits(ra_bitset_p bs)
+{
+    size_t rv = 0;
+    size_t i;
+    size_t words = ra_bitset_impl_word_count(bs);
+    ra_bitset_word_type w;
+    
+    for (i=0; i<words; ++i)
+    {
+        for (w = bs->data[i]; w != 0; ++rv)
+        {
+            w &= w-1U;
+        }
+    }
+    
+    return rv;
+}
+
 #define rabs_new(N)         (ra_bitset_impl_new((N)))
 #define rabs_free(B)        (ra_bitset_impl_free(&(B)))
 #define rabs_get(B, N)      (ra_bitset_impl_get(&(B), (N)))
@@ -146,5 +164,6 @@ static void ra_bitset_impl_stringify(ra_bitset_p bs, char* str)
 #define rabs_and_eq(B1, B2) (*(ra_bitset_impl_and_assign(&(B1), &(B2))))
 #define rabs_xor_eq(B1, B2) (*(ra_bitset_impl_xor_assign(&(B1), &(B2))))
 #define rabs_str(B, S)      (ra_bitset_impl_stringify(&(B), (S)))
+#define rabs_bitcount(B)    (ra_bitset_impl_count_bits(&(B)))
 
 #endif // RALIB_BITSET_H
